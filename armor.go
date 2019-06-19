@@ -39,14 +39,16 @@ type (
 	}
 
 	TLS struct {
-		Address      string `json:"address"`
-		CertFile     string `json:"cert_file"`
-		KeyFile      string `json:"key_file"`
-		Auto         bool   `json:"auto"`
-		CacheDir     string `json:"cache_dir"`
-		Email        string `json:"email"`
-		DirectoryURL string `json:"directory_url"`
-		Secured      bool   `json:"secured"`
+		Address      string   `json:"address"`
+		CertFile     string   `json:"cert_file"`
+		KeyFile      string   `json:"key_file"`
+		Auto         bool     `json:"auto"`
+		CacheDir     string   `json:"cache_dir"`
+		Email        string   `json:"email"`
+		DirectoryURL string   `json:"directory_url"`
+		Secured      bool     `json:"secured"`
+		KeyPinning   bool     `json:"key_pinning"`
+		pins         *pinning `json:"-"`
 	}
 
 	Admin struct {

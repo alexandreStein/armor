@@ -5,6 +5,9 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"os"
+	"sync"
+
+	"github.com/labstack/echo/v4"
 )
 
 func init() {
@@ -91,4 +94,41 @@ func (a *Armor) buildClientCertPool(host *Host) (certPool *x509.CertPool) {
 	}
 
 	return certPool
+}
+
+type (
+	pinning struct {
+		pins  map[string]*pins
+		mutex sync.RWMutex
+	}
+	pins struct {
+		m map[string]struct{}
+	}
+)
+
+func newPinning() *pinning {
+	m := make(map[string]*pins)
+	return &pinning{
+		pins: m,
+	}
+}
+
+func (p *pinning) process(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		p.mutex.RLock()
+		defer p.mutex.RUnlock()
+
+		pinString := ""
+		hostMap := p.pins[c.Request().Host]
+		for pin := range hostMap.m {
+			pinString += "pin-sha256=\"" + pin + "\";"
+		}
+		pinString += "max-age=5259600;"
+		c.Response().Header().Set("Public-Key-Pins", pinString)
+
+		if err := next(c); err != nil {
+			c.Error(err)
+		}
+		return nil
+	}
 }

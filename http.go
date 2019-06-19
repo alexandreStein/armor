@@ -1,7 +1,10 @@
 package armor
 
 import (
+	"crypto/sha256"
 	"crypto/tls"
+	"crypto/x509"
+	"encoding/base64"
 	"fmt"
 	"net"
 	"net/http"
@@ -54,6 +57,12 @@ func (a *Armor) NewHTTP() (h *HTTP) {
 		if a.TLS.DirectoryURL != "" {
 			e.AutoTLSManager.Client.DirectoryURL = a.TLS.DirectoryURL
 		}
+
+		if a.TLS.KeyPinning {
+			a.TLS.pins = newPinning()
+			e.Use(a.TLS.pins.process)
+		}
+
 	}
 	e.Logger = h.logger
 
@@ -153,7 +162,36 @@ func (h *HTTP) StartTLS() error {
 			// Use provided certificate
 			return cert, nil
 		} else if a.TLS.Auto {
-			return e.AutoTLSManager.GetCertificate(clientHello)
+			cert, err := e.AutoTLSManager.GetCertificate(clientHello)
+			if err != nil {
+				return nil, err
+			}
+
+			if a.TLS.KeyPinning {
+				hostPins := h.armor.TLS.pins.pins[clientHello.ServerName]
+				if hostPins == nil {
+					hostPins = new(pins)
+					hostPins.m = make(map[string]struct{})
+				}
+
+				for _, crtDer := range cert.Certificate {
+					parsedCert, err := x509.ParseCertificate(crtDer)
+					if err != nil {
+						return nil, err
+					}
+					pubKeyDer, err := x509.MarshalPKIXPublicKey(parsedCert.PublicKey)
+					if err != nil {
+						return nil, err
+					}
+					hash := sha256.Sum256(pubKeyDer)
+					keyHashBase := base64.StdEncoding.EncodeToString(hash[:])
+					hostPins.m[keyHashBase] = struct{}{}
+				}
+				h.armor.TLS.pins.mutex.Lock()
+				defer h.armor.TLS.pins.mutex.Unlock()
+				h.armor.TLS.pins.pins[clientHello.ServerName] = hostPins
+			}
+			return cert, err
 		}
 		return nil, nil // No certificate
 	}
