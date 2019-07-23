@@ -1,0 +1,14 @@
+--- 
+address: ":80"
+tls:
+  address: ":443"
+  cert_file: cert.pem
+  key_file: key.pem
+hosts: 
+  localhost: 
+    plugins:
+      -
+        name: static
+        root: "./"
+        html5: true
+        browse: true

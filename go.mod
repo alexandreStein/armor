@@ -2,10 +2,13 @@ module github.com/labstack/armor
 
 go 1.12
 
+// replace github.com/alexandrestein/securelink => /home/alexandre/go/src/gitea.interlab-net.com/alexandre/securelink
+
 require (
 	cloud.google.com/go v0.41.0 // indirect
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/Shyp/generate-tls-cert v0.0.0-20180217183001-cd913b339294 // indirect
+	github.com/alexandrestein/securelink v0.0.4
 	github.com/armon/circbuf v0.0.0-20190214190532-5111143e8da2 // indirect
 	github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
@@ -29,13 +32,11 @@ require (
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/logutils v1.0.0
 	github.com/hashicorp/mdns v1.0.1 // indirect
-	github.com/hashicorp/memberlist v0.1.4 // indirect
 	github.com/hashicorp/serf v0.8.3
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/kisielk/errcheck v1.2.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pty v1.1.8 // indirect
-	github.com/labstack/echo v3.3.10+incompatible // indirect
 	github.com/labstack/echo/v4 v4.1.6
 	github.com/labstack/gommon v0.2.9
 	github.com/labstack/tunnel-client v0.2.12
